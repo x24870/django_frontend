@@ -1,4 +1,6 @@
 window.addEventListener('load', () => {
+  const csrftoken = getCookie('csrftoken');
+
   buildList();
 
   //bind submit button listener
@@ -14,11 +16,13 @@ window.addEventListener('load', () => {
       method: 'POST',
       headers: {
         'Content-type': 'application/json',
+        'X-CSRFToken': csrftoken,
       },
       body: JSON.stringify({ 'title': title })
     })
       .then((response) => {//refresh task list after submitted
-        buildList()
+        buildList();
+        document.getElementById('form').reset()//clear the form
       })
 
   });
@@ -58,3 +62,18 @@ function buildList() {
     });
 }
 
+function getCookie(name) {
+  let cookieValue = null;
+  if (document.cookie && document.cookie !== '') {
+    const cookies = document.cookie.split(';');
+    for (let i = 0; i < cookies.length; i++) {
+      const cookie = cookies[i].trim();
+      // Does this cookie string begin with the name we want?
+      if (cookie.substring(0, name.length + 1) === (name + '=')) {
+        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+        break;
+      }
+    }
+  }
+  return cookieValue;
+}
