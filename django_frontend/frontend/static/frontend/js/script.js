@@ -1,5 +1,6 @@
 window.addEventListener('load', () => {
   const csrftoken = getCookie('csrftoken');
+  let activeItem = null;
 
   buildList();
 
@@ -10,6 +11,11 @@ window.addEventListener('load', () => {
     console.log('form submitted');
 
     let url = 'http://127.0.0.1:8000/api/task-create/';
+    if (activeItem != null) {
+      url = `http://127.0.0.1:8000/api/task-update/${activeItem.id}/`;
+      activeItem = null;
+    }
+
     let title = document.getElementById('title').value;
 
     fetch(url, {
@@ -59,6 +65,17 @@ function buildList() {
         //append to list-wrapper
         wrapper.innerHTML += item;
       }
+
+      //bind edit button event
+      //NOTE: If put this bind process in previous for loop,
+      //      it will cause an issue that only last item bind the event
+      for (let i in list) {
+        let editBtn = document.getElementsByClassName('edit')[i];
+        editBtn.addEventListener('click', () => {
+          editItem(list[i]);
+        });
+      }
+
     });
 }
 
@@ -76,4 +93,10 @@ function getCookie(name) {
     }
   }
   return cookieValue;
+}
+
+function editItem(item) {
+  console.log(`Clicked item: ${item.title}`);
+  activeItem = item;//set the global variable 'activeItem'
+  document.getElementById('title').value = activeItem.title;
 }
