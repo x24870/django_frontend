@@ -1,7 +1,7 @@
-window.addEventListener('load', () => {
-  const csrftoken = getCookie('csrftoken');
-  let activeItem = null;
+const csrftoken = getCookie('csrftoken');
+let activeItem = null;
 
+window.addEventListener('load', () => {
   buildList();
 
   //bind submit button listener
@@ -66,13 +66,19 @@ function buildList() {
         wrapper.innerHTML += item;
       }
 
-      //bind edit button event
       //NOTE: If put this bind process in previous for loop,
       //      it will cause an issue that only last item bind the event
       for (let i in list) {
+        //bind edit button event
         let editBtn = document.getElementsByClassName('edit')[i];
         editBtn.addEventListener('click', () => {
           editItem(list[i]);
+        });
+
+        //bind delete button event
+        let deleteBtn = document.getElementsByClassName('delete')[i];
+        deleteBtn.addEventListener('click', () => {
+          deleteItem(list[i]);
         });
       }
 
@@ -99,4 +105,17 @@ function editItem(item) {
   console.log(`Clicked item: ${item.title}`);
   activeItem = item;//set the global variable 'activeItem'
   document.getElementById('title').value = activeItem.title;
+}
+
+function deleteItem(item) {
+  console.log(`Delete item: ${item.title}`);
+  fetch(`http://127.0.0.1:8000/api/task-delete/${item.id}`, {
+    method: 'DELETE',
+    headers: {
+      'Content-type': 'application/json',
+      'X-CSRFToken': csrftoken,
+    }
+  }).then((response) => {
+    buildList();
+  });
 }
