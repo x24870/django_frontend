@@ -1,5 +1,6 @@
 const csrftoken = getCookie('csrftoken');
 let activeItem = null;
+let list_snapshot = []; //remove previous time item
 
 window.addEventListener('load', () => {
   buildList();
@@ -37,7 +38,7 @@ window.addEventListener('load', () => {
 
 function buildList() {
   const wrapper = document.getElementById('list-wrapper');
-  wrapper.innerHTML = '';//clear the wrapper
+  // wrapper.innerHTML = '';//clear the wrapper
 
   let url = 'http://127.0.0.1:8000/api/task-list/';
 
@@ -48,6 +49,14 @@ function buildList() {
 
       let list = data;
       for (let i in list) {
+        //remove previous time item
+        try {
+          console.log(`remove data-row-${i}`)
+          document.getElementById(`data-row-${i}`).remove();
+        } catch (err) {
+          console.log(err);
+        }
+
         let title_text = `<span class="title">${list[i].title}</span>`;
         if (list[i].complete == true) title_text = `<strike class="title">${list[i].title}</strike>`;
         let item = `
@@ -64,9 +73,18 @@ function buildList() {
           </div>
         `;
 
+
         //append to list-wrapper
         wrapper.innerHTML += item;
       }
+
+      //remove previous last item
+      console.log(list_snapshot.length, list.length)
+      if (list_snapshot.length > list.length) {
+        document.getElementById(`data-row-${list_snapshot.length - 1}`).remove();
+      }
+      //save current list items
+      list_snapshot = list;
 
       //NOTE: If put this bind process in previous for loop,
       //      it will cause an issue that only last item bind the event
