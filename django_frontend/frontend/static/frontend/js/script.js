@@ -48,10 +48,12 @@ function buildList() {
 
       let list = data;
       for (let i in list) {
+        let title_text = `<span class="title">${list[i].title}</span>`;
+        if (list[i].complete == true) title_text = `<strike class="title">${list[i].title}</strike>`;
         let item = `
           <div id="data-row-${i}" class="task-wrapper flex-wrapper">
             <div style="flex:7">
-              <span class="title">${list[i].title}</span>
+              ${title_text}
             </div>
             <div style="flex:1">
               <button class="btn btn-sm btn-outline-info edit">Edit</button>
@@ -79,6 +81,12 @@ function buildList() {
         let deleteBtn = document.getElementsByClassName('delete')[i];
         deleteBtn.addEventListener('click', () => {
           deleteItem(list[i]);
+        });
+
+        //bint strike event
+        let title = document.getElementsByClassName('title')[i];
+        title.addEventListener('click', () => {
+          strikeUnstrike(list[i]);
         });
       }
 
@@ -115,6 +123,24 @@ function deleteItem(item) {
       'Content-type': 'application/json',
       'X-CSRFToken': csrftoken,
     }
+  }).then((response) => {
+    buildList();
+  });
+}
+
+function strikeUnstrike(item) {
+  item.complete = !item.complete;//toggle the completed status
+  console.log(`Strike item: ${item.title} set to ${item.complete}`);
+  fetch(`http://127.0.0.1:8000/api/task-update/${item.id}/`, {
+    method: 'POST',
+    headers: {
+      'Content-type': 'application/json',
+      'X-CSRFToken': csrftoken,
+    },
+    body: JSON.stringify({
+      'title': item.title,
+      'complete': item.complete,
+    })
   }).then((response) => {
     buildList();
   });
